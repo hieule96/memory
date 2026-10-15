@@ -1,0 +1,74 @@
+# Copyright 2026 NXP
+# SPDX-License-Identifier: Apache-2.0
+
+mainmenu "MJPEG decode and NPU inference pipeline"
+
+menu "Pipeline configuration"
+
+config FILE_INPUT_PATH
+	string "Input MJPEG file path"
+	default "/SD:/input.mjpeg"
+	help
+	  Absolute path to the MJPEG input file: concatenated JPEG frames, all
+	  of the size set by JPEG_IMAGE_WIDTH and JPEG_IMAGE_HEIGHT.
+
+config JPEG_IMAGE_WIDTH
+	int "Width of the JPEG frames"
+	default 576
+
+config JPEG_IMAGE_HEIGHT
+	int "Height of the JPEG frames"
+	default 432
+
+endmenu
+
+menu "Inference configuration"
+
+config MODEL_LABELS
+	string "Comma-separated class labels"
+	default "no person,person"
+	help
+	  One label per model output, in output order. The default matches the
+	  MLPerf Tiny Visual Wake Words model.
+
+config TENSOR_ARENA_SIZE
+	int "TFLM tensor arena size in bytes"
+	default 131072
+	help
+	  Holds the model's input, output, intermediate tensors and the NPU
+	  scratch buffer. The sample logs the bytes actually used at start-up;
+	  set this a little above that value.
+
+config MODEL_ZEPHYR_REGION
+	bool "Place the model and tensor arena in a Zephyr memory region"
+	help
+	  Copy the model from flash at start-up into the region named by
+	  MODEL_ZEPHYR_REGION_NAME, and allocate the tensor arena there. Use it
+	  when the default RAM is too small; the NPU must be able to reach the
+	  region.
+
+config MODEL_ZEPHYR_REGION_NAME
+	string "Memory region name"
+	depends on MODEL_ZEPHYR_REGION
+	default "SRAM1"
+	help
+	  Name of a zephyr,memory-region devicetree node.
+
+config INFERENCE_DROP_FRAMES
+	bool "Drop frames decoded while the model is busy"
+	help
+	  By default the decoder waits for the model, so every frame of the
+	  file is classified. Enable this for live sources, where waiting
+	  would only add latency.
+
+config INFERENCE_STACK_SIZE
+	int "Inference thread stack size"
+	default 4096
+
+config INFERENCE_PRIORITY
+	int "Inference thread priority"
+	default 5
+
+endmenu
+
+source "Kconfig.zephyr"

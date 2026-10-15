@@ -1,0 +1,17 @@
+sample:
+  name: MJPEG decode and NPU inference pipeline
+
+tests:
+  sample.mpipe.jpeg_npu:
+    tags:
+      - mpipe
+      - video
+      - filesystem
+      - tensorflow
+    modules:
+      - tflite-micro
+    platform_allow:
+      - native_sim/native/64
+    integration_platforms:
+      - native_sim/native/64
+    build_only: true
